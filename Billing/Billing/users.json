@@ -1,0 +1,17 @@
+[
+  {
+    "name": "boris",
+    "rating": 5000,
+    "amount": 0
+  },
+  {
+    "name": "maria",
+    "rating": 1000,
+    "amount": 100000000
+  },
+  {
+    "name": "oleg",
+    "rating": 800,
+    "amount": 217635
+  }
+]
