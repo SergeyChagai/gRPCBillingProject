@@ -7,11 +7,11 @@
   {
     "name": "maria",
     "rating": 1000,
-    "amount": 100000000
+    "amount": 0
   },
   {
     "name": "oleg",
     "rating": 800,
-    "amount": 217635
+    "amount": 0
   }
 ]

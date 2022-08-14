@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 
@@ -7,14 +8,15 @@ namespace Billing
 {
     public class BillingImpl : Billing.BillingBase
     {
-        private List<JsonUserProfile> _users;
+        public List<JsonUserProfile> Users { get; private set; }
+        private readonly object usersLock = new object();
         public BillingImpl(List<JsonUserProfile> jsonUsers)
         {
-            _users = new List<JsonUserProfile>(jsonUsers);
+            Users = new List<JsonUserProfile>(jsonUsers);
         }
         public override async Task ListUsers(None request, IServerStreamWriter<UserProfile> responseStream, ServerCallContext context)
         {
-            foreach (JsonUserProfile user in _users)
+            foreach (JsonUserProfile user in Users)
             {
                 var reply = new UserProfile
                 {
@@ -26,9 +28,20 @@ namespace Billing
             }
         }
 
-        public override Task<Response> CoinsEmission(EmissionAmount request, ServerCallContext context)
+        public override async Task<Response> CoinsEmission(EmissionAmount request, ServerCallContext context)
         {
-            return base.CoinsEmission(request, context);
+            var amount = request.Amount;
+
+            if (amount < Users.Count)
+            {
+                return new Response
+                {
+                    Status = Response.Types.Status.Failed,
+                    Comment = "Coins amount is less of users"
+                };
+            }
+            var response = await Task.Run(() => DistributeAmount(amount));
+            return response;
         }
 
         public override Task<Response> MoveCoins(MoveCoinsTransaction request, ServerCallContext context)
@@ -41,6 +54,30 @@ namespace Billing
             return base.LongestHistoryCoin(request, context);
         }
 
+        private Response DistributeAmount(long amount)
+        {
+            lock (usersLock)
+            {
+                var random = new Random();
+                var ratings = Users.Select(user => user.rating).ToArray();
+                var summaryRating = ratings.Sum();
 
+                foreach (JsonUserProfile jsonUser in Users)
+                {
+                    amount -= 1;
+                    jsonUser.amount += 1;
+                }
+
+                foreach (JsonUserProfile jsonUser in Users)
+                {
+                    var coinsForUser = amount * jsonUser.rating / summaryRating;
+                    amount -= coinsForUser;
+                    jsonUser.amount += coinsForUser;
+                }
+                var luckyIndex = random.Next(Users.Count);
+                Users[luckyIndex].amount += amount;
+            }
+            return new Response { Status = Response.Types.Status.Ok };
+        }
     }
 }

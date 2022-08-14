@@ -21,9 +21,14 @@ namespace Billing
 
             while (await call.ResponseStream.MoveNext())
             {
-                responseLog.Append(call.ResponseStream.Current.ToString());
+                responseLog.AppendLine(call.ResponseStream.Current.ToString());
             }
             Log(responseLog.ToString());
+        }
+
+        public async Task CoinsEmission(long coins)
+        {
+            await _client.CoinsEmissionAsync(new EmissionAmount { Amount = coins });
         }
 
         private void Log(string s)

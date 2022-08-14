@@ -9,7 +9,7 @@ namespace Billing
     {
         static void Main(string[] args)
         {
-            const int Port = 5001;
+            const int Port = 30052;
 
             var users = BillingUtil.LoadUsers();
 
