@@ -28,7 +28,20 @@ namespace Billing
 
         public async Task CoinsEmission(long coins)
         {
-            await _client.CoinsEmissionAsync(new EmissionAmount { Amount = coins });
+            var result = await _client.CoinsEmissionAsync(new EmissionAmount { Amount = coins });
+            Log(result.ToString());
+        }
+
+        public async Task MoveCoins(string source, string destination, long coins)
+        {
+            var result = await _client.MoveCoinsAsync(new MoveCoinsTransaction { SrcUser = source, DstUser = destination, Amount = coins });
+            Log(result.ToString());
+        }
+
+        public async Task LongestHistoryCoin()
+        {
+            var result = await _client.LongestHistoryCoinAsync(new None());
+            Log(result.ToString());
         }
 
         private void Log(string s)

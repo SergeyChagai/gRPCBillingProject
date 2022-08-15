@@ -74,6 +74,20 @@ namespace BillingTests
 
         }
 
+        [Fact]
+        public async Task MoveCoinsNegativeTest()
+        {
+            //Arrange
+            sut = new BillingImpl(BillingUtil.LoadUsers());
+            await sut.CoinsEmission(new EmissionAmount { Amount = 1000 }, null);
+
+            //Act
+            var response = await sut.MoveCoins(new MoveCoinsTransaction { SrcUser = "", DstUser = "boris", Amount = 1}, null);
+
+            //Assert
+            Assert.Equal(Response.Types.Status.Failed, response.Status);
+        }
+
         [Theory]
         [MemberData(nameof(LongestHistoryCoinTestData))]
         public async Task LongestHistoryCoinTest(MoveCoinsTransaction[] transactions, Coin expected)
@@ -90,7 +104,7 @@ namespace BillingTests
             var actual = await sut.LongestHistoryCoin(new None(), null);
 
             //Assert
-            Assert.Equal(expected, actual);
+            Assert.Equal(expected.History, actual.History);
 
         }
 
@@ -102,6 +116,17 @@ namespace BillingTests
                 {
                     new MoveCoinsTransaction { SrcUser = "boris", DstUser = "maria", Amount = 1 },
                     new MoveCoinsTransaction { SrcUser = "boris", DstUser = "oleg", Amount = 1 },
+                    new MoveCoinsTransaction { SrcUser = "maria", DstUser = "oleg", Amount = 1 },
+                },
+                new Coin{ Id = 1, History = "boris;maria;oleg" }
+            };
+
+            yield return new object[]
+            {
+                new MoveCoinsTransaction[]
+                {
+                    new MoveCoinsTransaction { SrcUser = "boris", DstUser = "maria", Amount = 100 },
+                    new MoveCoinsTransaction { SrcUser = "boris", DstUser = "oleg", Amount = 50 },
                     new MoveCoinsTransaction { SrcUser = "maria", DstUser = "oleg", Amount = 1 },
                 },
                 new Coin{ Id = 1, History = "boris;maria;oleg" }

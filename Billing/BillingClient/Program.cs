@@ -12,12 +12,16 @@ namespace Billing
         {
             var channel = new Channel("127.0.0.1:30052", ChannelCredentials.Insecure);
             var client = new BillingClient(new Billing.BillingClient(channel));
+            Console.WriteLine("Start client\n");
 
             // Tasks schedule
             client.ListUsers().Wait();
-
+            client.CoinsEmission(1000).Wait();
+            client.MoveCoins("boris", "maria", 1).Wait();
+            client.LongestHistoryCoin().Wait();
             channel.ShutdownAsync().Wait();
-            Console.WriteLine("Start client\n" + "Press any key for exit");
+            
+            Console.WriteLine("Press any key for exit");
             Console.ReadKey();
         }
     }

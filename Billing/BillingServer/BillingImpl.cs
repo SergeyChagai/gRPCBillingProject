@@ -79,7 +79,8 @@ namespace Billing
         {
             return Task.Run(() =>
             {
-                return new Coin();
+                var longestHistoryCoin = Coins.Aggregate((x, y) => x.History.Count(c => c == ';') < y.History.Count(c => c == ';') ? y : x);
+                return longestHistoryCoin;
             });
         }
 
